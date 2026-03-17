@@ -494,9 +494,9 @@
 
   <div class="header-right">
     <div class="filial-selector">
-      <button class="filial-btn active" onclick="selectFilial(1, this)">DLIT</button>
-      <button class="filial-btn" onclick="selectFilial(2, this)">DLAC</button>
-      <button class="filial-btn" onclick="selectFilial(3, this)">DLVD</button>
+      <button class="filial-btn active" onclick="selectFilial(551, this)">DLIT</button>
+      <button class="filial-btn" onclick="selectFilial(645, this)">DLAC</button>
+      <button class="filial-btn" onclick="selectFilial(677, this)">DLVD</button>
       <button class="filial-btn multi" onclick="selectFilial('all', this)">TODAS</button>
     </div>
     <div class="status-dot" title="API conectada"></div>
@@ -577,21 +577,22 @@
 <script>
 // ── CONFIG ──────────────────────────────────────────
 const CLOUDFY = {
-  url: 'https://api.cloudfy.net.br/ApiCFYCC',
+  url: '/api/cloudfy',
   AccKey: 'b2ecb1899e65479b9a1da8ded1fe3044',
   TokenKey: '8edee9377a254613b0f884cbbe12d1f68cc67bce64f54aaca4aaba52bc2f821bd4973f3d86364a3098bfcd7c4fbec21c89d61d0cb752412c9454e9b84b4729e6',
   LoginUsr: 'integracao.queamais',
-  NomeUsr: 'INTEGRACAO DELI',
-  CodEmpresa: 3
+  NomeUsr: 'INTEGRACAO DELI'
 };
 
 const FILIAIS = {
-  1: 'Deli Itacorubi',
-  2: 'Deli Acate',
-  3: 'Deli Vidal'
+  551: { nome: 'Deli Itacorubi', codFilial: 1, sigla: 'DLIT' },
+  645: { nome: 'Deli Acate',     codFilial: 1, sigla: 'DLAC' },
+  677: { nome: 'Deli Centro',    codFilial: 1, sigla: 'DLVD' }
 };
 
-let selectedFilial = 1;
+const FILIAIS_IDS = [551, 645, 677];
+
+let selectedFilial = 551;
 let isLoading = false;
 let chartInstances = {};
 
@@ -633,7 +634,8 @@ function daysAgoCloudfy(n) {
   return dateToCloudfy(d.toISOString().split('T')[0]);
 }
 
-async function fetchVendas(dataInicio, dataFim, codFilial) {
+async function fetchVendas(dataInicio, dataFim, codEmpresa) {
+  const filial = FILIAIS[codEmpresa];
   const body = {
     Parameters: {
       AccKey: CLOUDFY.AccKey,
@@ -643,8 +645,8 @@ async function fetchVendas(dataInicio, dataFim, codFilial) {
         Solicitante: {
           LoginUsr: CLOUDFY.LoginUsr,
           NomeUsr: CLOUDFY.NomeUsr,
-          CodEmpresa: CLOUDFY.CodEmpresa,
-          CodFilial: codFilial
+          CodEmpresa: codEmpresa,
+          CodFilial: filial.codFilial
         },
         Filtros: {
           DataInicio: dataInicio,
@@ -671,11 +673,11 @@ async function fetchVendas(dataInicio, dataFim, codFilial) {
 }
 
 async function fetchMultiFilial(dataInicio, dataFim) {
-  const filiais = selectedFilial === 'all' ? [1, 2, 3] : [selectedFilial];
+  const filiais = selectedFilial === 'all' ? FILIAIS_IDS : [selectedFilial];
   const results = await Promise.all(
     filiais.map(async f => ({
       filial: f,
-      nome: FILIAIS[f],
+      nome: FILIAIS[f].nome,
       vendas: await fetchVendas(dataInicio, dataFim, f)
     }))
   );
@@ -700,7 +702,7 @@ REGRAS:
 - Formate números grandes com pontos (ex: R$ 1.234,56)
 - Se não tiver dados suficientes para responder, diga claramente
 
-FILIAIS DISPONÍVEIS: Deli Itacorubi (1), Deli Acate (2), Deli Vidal (3)`;
+FILIAIS DISPONÍVEIS: Deli Itacorubi (empresa 551), Deli Acate (empresa 645), Deli Centro (empresa 677)`;
 
   const userMsg = `PERGUNTA: ${pergunta}
 
@@ -919,8 +921,8 @@ async function sendMessage() {
       filialInfo = 'TODAS AS FILIAIS';
     } else {
       const vendas = await fetchVendas(dataInicio, dataFim, selectedFilial);
-      dadosVendas = [{ filial: selectedFilial, nome: FILIAIS[selectedFilial], vendas }];
-      filialInfo = FILIAIS[selectedFilial].toUpperCase();
+      dadosVendas = [{ filial: selectedFilial, nome: FILIAIS[selectedFilial].nome, vendas }];
+      filialInfo = FILIAIS[selectedFilial].nome.toUpperCase();
     }
 
     const contexto = `Filial selecionada: ${filialInfo}. Período consultado: ${dataInicio} até ${dataFim}. Data de referência: ${dataBase}.`;
