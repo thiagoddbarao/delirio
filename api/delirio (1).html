@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delírio — Deli</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1917;
+    --surface2: #242220;
+    --border: #2e2c29;
+    --accent: #e8c547;
+    --accent2: #d4a843;
+    --text: #f0ede8;
+    --text2: #9a9690;
+    --text3: #5a5752;
+    --green: #4caf7d;
+    --red: #e05c4b;
+    --blue: #5b9bd5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+
+  .logo-deli {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--text2);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-rio {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .filial-selector {
+    display: flex;
+    gap: 6px;
+  }
+
+  .filial-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+
+  .filial-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filial-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    font-weight: 500;
+  }
+
+  .filial-btn.multi {
+    border-style: dashed;
+  }
+  .filial-btn.multi.active {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* CONFIG PANEL */
+  .config-panel {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 28px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .config-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .config-item label { color: var(--text3); letter-spacing: 0.5px; }
+
+  .config-item input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    width: 280px;
+  }
+
+  .config-item input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .config-item input.key-input { width: 380px; }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .message {
+    display: flex;
+    gap: 14px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { flex-direction: row-reverse; }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+  }
+
+  .avatar.ai {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
+
+  .avatar.user-av {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    font-style: normal;
+  }
+
+  .bubble {
+    max-width: 72%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .message.user .bubble {
+    background: var(--surface2);
+    border-color: var(--border);
+    color: var(--text2);
+  }
+
+  .bubble h3 {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+
+  .bubble p { margin-bottom: 8px; }
+  .bubble p:last-child { margin-bottom: 0; }
+
+  .bubble .highlight {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .bubble .good { color: var(--green); }
+  .bubble .bad { color: var(--red); }
+
+  .bubble ul { padding-left: 16px; margin: 6px 0; }
+  .bubble li { margin-bottom: 4px; }
+
+  .bubble .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .bubble .data-row:last-child { border-bottom: none; }
+  .bubble .data-label { color: var(--text2); }
+  .bubble .data-value { font-weight: 500; }
+
+  /* CHART CONTAINER */
+  .chart-container {
+    margin-top: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+
+  .chart-title {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  canvas { max-width: 100%; }
+
+  /* THINKING */
+  .thinking {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text3);
+    font-size: 12px;
+    padding: 4px 0;
+  }
+
+  .thinking-dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .thinking-dots span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: dot-bounce 1.2s infinite;
+  }
+
+  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* FILIAL TAG */
+  .filial-tag {
+    display: inline-block;
+    font-size: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    padding: 16px 28px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  .input-wrapper {
+    flex: 1;
+    position: relative;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13.5px;
+    font-weight: 300;
+    padding: 12px 16px;
+    border-radius: 6px;
+    resize: none;
+    min-height: 48px;
+    max-height: 140px;
+    line-height: 1.5;
+    transition: border-color 0.15s;
+  }
+
+  textarea::placeholder { color: var(--text3); }
+  textarea:focus { outline: none; border-color: var(--accent); }
+
+  .send-btn {
+    width: 48px;
+    height: 48px;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: var(--accent2); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .send-btn svg { width: 18px; height: 18px; }
+
+  /* SUGGESTIONS */
+  .suggestions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .suggestion {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+
+  .suggestion:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* WELCOME */
+  .welcome {
+    text-align: center;
+    padding: 40px 20px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .welcome-logo {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 52px;
+    margin-bottom: 8px;
+  }
+
+  .welcome-logo span:first-child { color: var(--text2); }
+  .welcome-logo span:last-child { color: var(--accent); }
+
+  .welcome-sub {
+    color: var(--text3);
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 32px;
+  }
+
+  .welcome-cards {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .welcome-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    text-align: left;
+    max-width: 210px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .welcome-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .welcome-card-icon {
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .welcome-card-title {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .welcome-card-desc {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-deli">deli</span><span class="logo-rio">río</span>
+  </div>
+
+  <div class="header-right">
+    <div class="filial-selector">
+      <button class="filial-btn active" onclick="selectFilial(1, this)">DLIT</button>
+      <button class="filial-btn" onclick="selectFilial(2, this)">DLAC</button>
+      <button class="filial-btn" onclick="selectFilial(3, this)">DLVD</button>
+      <button class="filial-btn multi" onclick="selectFilial('all', this)">TODAS</button>
+    </div>
+    <div class="status-dot" title="API conectada"></div>
+  </div>
+</header>
+
+<div class="config-panel">
+  <div class="config-item">
+    <label>CLAUDE API KEY</label>
+    <input type="password" id="claudeKey" class="key-input" placeholder="sk-ant-..." />
+  </div>
+  <div class="config-item">
+    <label>DATA BASE</label>
+    <input type="date" id="dataBase" />
+  </div>
+</div>
+
+<div class="messages" id="messages">
+  <div class="welcome" id="welcome">
+    <div class="welcome-logo">
+      <span>deli</span><span>río</span>
+    </div>
+    <div class="welcome-sub">INTELIGÊNCIA COMERCIAL · DELI</div>
+
+    <div class="welcome-cards">
+      <div class="welcome-card" onclick="sendSuggestion('Como está meu faturamento hoje comparado com a mesma terça da semana passada?')">
+        <div class="welcome-card-icon">📊</div>
+        <div class="welcome-card-title">Comparativo de faturamento</div>
+        <div class="welcome-card-desc">Hoje vs semana passada no mesmo horário</div>
+      </div>
+      <div class="welcome-card" onclick="sendSuggestion('Quais foram meus 10 produtos mais vendidos essa semana em reais? Gere um gráfico.')">
+        <div class="welcome-card-icon">🏆</div>
+        <div class="welcome-card-title">Ranking de produtos</div>
+        <div class="welcome-card-desc">Top 10 da semana em valor e quantidade</div>
+      </div>
+      <div class="welcome-card" onclick="sendSuggestion('Qual foi meu ticket médio por horário hoje? Em quais horários vendo mais?')">
+        <div class="welcome-card-icon">🕐</div>
+        <div class="welcome-card-title">Ticket médio por hora</div>
+        <div class="welcome-card-desc">Análise de performance ao longo do dia</div>
+      </div>
+      <div class="welcome-card" onclick="sendSuggestion('Quantos itens por comanda foram vendidos em média nessa última semana por hora?')">
+        <div class="welcome-card-icon">🧾</div>
+        <div class="welcome-card-title">Itens por comanda</div>
+        <div class="welcome-card-desc">Média de itens por hora na semana</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="input-area">
+  <div class="suggestions">
+    <button class="suggestion" onclick="sendSuggestion('Como está meu faturamento hoje?')">faturamento hoje</button>
+    <button class="suggestion" onclick="sendSuggestion('Produtos mais vendidos essa semana')">top produtos</button>
+    <button class="suggestion" onclick="sendSuggestion('Ticket médio por horário hoje')">ticket médio</button>
+    <button class="suggestion" onclick="sendSuggestion('Quantas vendas fiz hoje?')">total de vendas</button>
+    <button class="suggestion" onclick="sendSuggestion('Gere um gráfico de vendas por hora de hoje')">gráfico por hora</button>
+  </div>
+  <div class="input-row">
+    <div class="input-wrapper">
+      <textarea
+        id="userInput"
+        placeholder="Pergunte qualquer coisa sobre suas vendas..."
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ── CONFIG ──────────────────────────────────────────
+const CLOUDFY = {
+  url: '/api/cloudfy',
+  AccKey: 'b2ecb1899e65479b9a1da8ded1fe3044',
+  TokenKey: '8edee9377a254613b0f884cbbe12d1f68cc67bce64f54aaca4aaba52bc2f821bd4973f3d86364a3098bfcd7c4fbec21c89d61d0cb752412c9454e9b84b4729e6',
+  LoginUsr: 'integracao.queamais',
+  NomeUsr: 'INTEGRACAO DELI',
+  CodEmpresa: 3
+};
+
+const FILIAIS = {
+  1: 'Deli Itacorubi',
+  2: 'Deli Acate',
+  3: 'Deli Vidal'
+};
+
+let selectedFilial = 1;
+let isLoading = false;
+let chartInstances = {};
+
+// Set today's date as default
+document.getElementById('dataBase').value = new Date().toISOString().split('T')[0];
+
+// ── FILIAL SELECTION ────────────────────────────────
+function selectFilial(filial, btn) {
+  selectedFilial = filial;
+  document.querySelectorAll('.filial-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── AUTO RESIZE TEXTAREA ────────────────────────────
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ── CLOUDFY API ──────────────────────────────────────
+function dateToCloudfy(d) {
+  return parseInt(d.replace(/-/g, ''));
+}
+
+function todayCloudfy() {
+  return dateToCloudfy(new Date().toISOString().split('T')[0]);
+}
+
+function daysAgoCloudfy(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return dateToCloudfy(d.toISOString().split('T')[0]);
+}
+
+async function fetchVendas(dataInicio, dataFim, codFilial) {
+  const body = {
+    Parameters: {
+      AccKey: CLOUDFY.AccKey,
+      TokenKey: CLOUDFY.TokenKey,
+      ApiName: 'CFYCC870',
+      Data: {
+        Solicitante: {
+          LoginUsr: CLOUDFY.LoginUsr,
+          NomeUsr: CLOUDFY.NomeUsr,
+          CodEmpresa: CLOUDFY.CodEmpresa,
+          CodFilial: codFilial
+        },
+        Filtros: {
+          DataInicio: dataInicio,
+          DataFim: dataFim,
+          SituacaoCupom: 1,
+          IdentifDesconto: 1,
+          IdentifTaxaServico: 1,
+          IdentifConsultaProd: 1,
+          IdentifConsultaFormaPagto: 1,
+          IdentifConsultaProdCancelados: 2
+        }
+      }
+    }
+  };
+
+  const resp = await fetch(CLOUDFY.url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  const json = await resp.json();
+  return json?.Parameters?.Data?.Resultado?.CuponsVenda || [];
+}
+
+async function fetchMultiFilial(dataInicio, dataFim) {
+  const filiais = selectedFilial === 'all' ? [1, 2, 3] : [selectedFilial];
+  const results = await Promise.all(
+    filiais.map(async f => ({
+      filial: f,
+      nome: FILIAIS[f],
+      vendas: await fetchVendas(dataInicio, dataFim, f)
+    }))
+  );
+  return results;
+}
+
+// ── CLAUDE API ───────────────────────────────────────
+async function askClaude(pergunta, dadosVendas, contexto) {
+  const claudeKey = document.getElementById('claudeKey').value.trim();
+  if (!claudeKey) throw new Error('Configure sua chave da API Claude no topo da tela.');
+
+  const systemPrompt = `Você é o Delírio, assistente de inteligência comercial da Deli, rede de restaurantes/lanchonetes em Florianópolis.
+
+Você recebe dados reais de vendas da API Cloudfy e responde perguntas do dono/gestor sobre o negócio.
+
+REGRAS:
+- Responda sempre em português brasileiro, de forma direta e objetiva
+- Quando mencionar valores monetários, use R$ com 2 casas decimais
+- Quando sugerir gráficos, retorne um JSON especial no formato: ###CHART###{"type":"bar","labels":[...],"datasets":[...],"title":"..."}###ENDCHART###
+- Seja analítico: além de responder, aponte insights relevantes
+- Use os dados fornecidos para calcular o que for pedido
+- Formate números grandes com pontos (ex: R$ 1.234,56)
+- Se não tiver dados suficientes para responder, diga claramente
+
+FILIAIS DISPONÍVEIS: Deli Itacorubi (1), Deli Acate (2), Deli Vidal (3)`;
+
+  const userMsg = `PERGUNTA: ${pergunta}
+
+CONTEXTO: ${contexto}
+
+DADOS DE VENDAS:
+${JSON.stringify(dadosVendas, null, 2)}`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': claudeKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content[0].text;
+}
+
+// ── RENDER RESPONSE ──────────────────────────────────
+function renderResponse(text, filialInfo) {
+  const parts = text.split('###CHART###');
+  let html = `<div class="filial-tag">${filialInfo}</div>`;
+
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      // Text part
+      const formatted = parts[i]
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="highlight">$1</strong>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      html += `<p>${formatted}</p>`;
+    } else {
+      // Chart part
+      const endIdx = parts[i].indexOf('###ENDCHART###');
+      if (endIdx > -1) {
+        const chartJson = parts[i].substring(0, endIdx);
+        const chartId = 'chart_' + Date.now() + '_' + i;
+        try {
+          const chartData = JSON.parse(chartJson);
+          html += `<div class="chart-container">
+            <div class="chart-title">${chartData.title || 'GRÁFICO'}</div>
+            <canvas id="${chartId}" height="200"></canvas>
+          </div>`;
+          // Store chart data for after render
+          window._pendingCharts = window._pendingCharts || {};
+          window._pendingCharts[chartId] = chartData;
+        } catch(e) {
+          console.error('Chart parse error:', e);
+        }
+      }
+    }
+  }
+
+  return html;
+}
+
+function renderPendingCharts() {
+  if (!window._pendingCharts) return;
+  for (const [id, data] of Object.entries(window._pendingCharts)) {
+    const canvas = document.getElementById(id);
+    if (!canvas) continue;
+    if (chartInstances[id]) chartInstances[id].destroy();
+
+    const colors = [
+      '#e8c547', '#5b9bd5', '#4caf7d', '#e05c4b',
+      '#9b7fd4', '#e8834a', '#4abfcc', '#d4a843'
+    ];
+
+    chartInstances[id] = new Chart(canvas, {
+      type: data.type || 'bar',
+      data: {
+        labels: data.labels,
+        datasets: data.datasets.map((ds, i) => ({
+          ...ds,
+          backgroundColor: ds.backgroundColor || colors[i % colors.length] + '99',
+          borderColor: ds.borderColor || colors[i % colors.length],
+          borderWidth: 1.5,
+          borderRadius: 4
+        }))
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: { color: '#9a9690', font: { family: 'DM Mono', size: 11 } }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#5a5752', font: { family: 'DM Mono', size: 11 } },
+            grid: { color: '#2e2c29' }
+          },
+          y: {
+            ticks: { color: '#5a5752', font: { family: 'DM Mono', size: 11 } },
+            grid: { color: '#2e2c29' }
+          }
+        }
+      }
+    });
+  }
+  window._pendingCharts = {};
+}
+
+// ── ADD MESSAGE ──────────────────────────────────────
+function addMessage(role, content, isHtml = false) {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role === 'user' ? 'user-av' : 'ai'}`;
+  avatar.textContent = role === 'user' ? 'vc' : 'D';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+
+  if (isHtml) {
+    bubble.innerHTML = content;
+  } else {
+    bubble.textContent = content;
+  }
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  return bubble;
+}
+
+function addThinking() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'message';
+  div.id = 'thinking';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ai';
+  avatar.textContent = 'D';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble thinking';
+  bubble.innerHTML = `
+    <div class="thinking-dots">
+      <span></span><span></span><span></span>
+    </div>
+    <span>consultando dados...</span>
+  `;
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeThinking() {
+  const t = document.getElementById('thinking');
+  if (t) t.remove();
+}
+
+// ── SEND MESSAGE ──────────────────────────────────────
+async function sendMessage() {
+  if (isLoading) return;
+
+  const input = document.getElementById('userInput');
+  const pergunta = input.value.trim();
+  if (!pergunta) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  addMessage('user', pergunta);
+  addThinking();
+
+  try {
+    const dataBase = document.getElementById('dataBase').value;
+    const hoje = dateToCloudfy(dataBase);
+    const semanaAtras = daysAgoCloudfy(7);
+    const mesAtras = daysAgoCloudfy(30);
+
+    // Determine date range based on question
+    let dataInicio = hoje;
+    let dataFim = hoje;
+    const perguntaLower = pergunta.toLowerCase();
+
+    if (perguntaLower.includes('semana')) {
+      dataInicio = semanaAtras;
+    } else if (perguntaLower.includes('mês') || perguntaLower.includes('mes')) {
+      dataInicio = mesAtras;
+    } else if (perguntaLower.includes('ontem')) {
+      dataInicio = daysAgoCloudfy(1);
+      dataFim = daysAgoCloudfy(1);
+    }
+
+    // Fetch data
+    let dadosVendas;
+    let filialInfo;
+
+    if (selectedFilial === 'all') {
+      dadosVendas = await fetchMultiFilial(dataInicio, dataFim);
+      filialInfo = 'TODAS AS FILIAIS';
+    } else {
+      const vendas = await fetchVendas(dataInicio, dataFim, selectedFilial);
+      dadosVendas = [{ filial: selectedFilial, nome: FILIAIS[selectedFilial], vendas }];
+      filialInfo = FILIAIS[selectedFilial].toUpperCase();
+    }
+
+    const contexto = `Filial selecionada: ${filialInfo}. Período consultado: ${dataInicio} até ${dataFim}. Data de referência: ${dataBase}.`;
+
+    const resposta = await askClaude(pergunta, dadosVendas, contexto);
+
+    removeThinking();
+    const html = renderResponse(resposta, filialInfo);
+    addMessage('ai', html, true);
+    setTimeout(renderPendingCharts, 100);
+
+  } catch (err) {
+    removeThinking();
+    addMessage('ai', `Erro: ${err.message}`, false);
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function sendSuggestion(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+</script>
+</body>
+</html>
